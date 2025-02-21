@@ -601,6 +601,8 @@ def assignData(tables, int_year):
 
 
 
+assignData()
+
 # perceptron (true = draft, false = don't)
 
 # need to parse stats to be able to pass in nfl and college stats to signify success or failure
@@ -613,12 +615,14 @@ player_stats = []
 def clean(word):
     try:
         if len(word) > 0:
-            trimmed = float(word[0])
-            return word
+            trimmed = word.strip(" '\[]()")
+            test = float(word)
+            return trimmed
         else:
             return 0
     except ValueError:
         cleaned = word.strip(" '\[]()")
+        cleaned = cleaned.replace('-', '.')
         try:
             if len(cleaned) > 0:
                 test = float(cleaned[0])
@@ -654,15 +658,63 @@ def pad(vec, max_length):
     while len(vec) < max_length:
         vec.append(0)
 
-def normalize(stat, count, pos):
-    print('COMPLETE ME PLEASE SO I CAN BE PUT OUT OF MY MISSOURI')
-    
+# normalizes stat value to 0, 1 range
+def normalize_stat(count, mins, val):
+    if val == 0:
+        return 0
+    min = mins[count][0]
+    max = mins[count][1]
+    if max == min:
+        min = max - 1
+    return (val - min) / (max - min)
+
+# gathers min and max value for each category (used for normalization
+def normalize(pos, fn):
+    # val - min / max - min
+    minmax = {}
+    with open(fn, mode='r') as file:
+        reader = csv.reader(file)
+        count = 0
+        classification = False
+        for w in reader:
+            for st in w:
+                clean_word = clean(st)
+                if st == pos:
+                    count = 0
+                if clean_word != False and clean_word != 0 and clean_word is not None:
+                        if st == pos:
+                            classification = True
+                            count += 1
+                        elif classification:
+                            count = 0
+                            classification = False
+                        else:
+                            val = float(clean_word)
+                            if count in minmax:
+                                if val != 0:
+                                    if count in minmax:
+                                        if val < minmax[count][0]:
+                                            minmax[count][0] = val
+                                        elif val > minmax[count][1]:
+                                            minmax[count][1] = val
+                            else:
+                                if val != 0:
+                                    mins = [val, val]
+                                    minmax[count] = mins
+                            count += 1
+    return minmax
+
+# normalize('WR', getFileName('WR'))
 
 # reads in csv of specified position, and outputs a list of each training vector
 # fn = file name
 # pos = position
 def readCSV(fn, pos):
     global player_stats
+
+    # min and max for each value category
+    min_max = normalize(pos, fn)
+
     test_stats = []
     with open(fn, mode='r') as file:
         reader = csv.reader(file)
@@ -672,11 +724,18 @@ def readCSV(fn, pos):
         classification = False
         for row in reader:
             for word in row:
-                if count > max_count(pos):
+                clean_word = clean(word)
+                if count == 11:
+                    q = 1
+                if word == pos:
+                    count = 0
+                    classification = True
+                if clean_word != False and clean_word != 0 and clean_word is not None or classification:
                     if word == pos:
                         player_stats.append(vec)
                         classification = True
                     elif classification:
+                        count = 0
                         if len(vec) < max_length(pos):
                             pad(vec, max_length(pos))
                         total_vec.append(vec)
@@ -689,14 +748,14 @@ def readCSV(fn, pos):
                     else:
                         clean_word = clean(word)
                         if clean_word != False:
-                            vec.append(clean_word)
-                else:
-                    count += 1
+                            # normalizes stat value
+                            norm_word = normalize_stat(count, min_max, float(clean_word))
+                            vec.append(norm_word)
+                        count += 1
         print(test_stats)
         return test_stats
 
-readCSV(getFileName('WR'), 'WR')
-# print(player_stats)
+# readCSV(getFileName('WR'), 'WR')
 
 class BinaryPerceptron():
     def __init__(self, examples, iterations, round):
