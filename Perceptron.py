@@ -9,7 +9,9 @@ import json
 import re
 import string
 from sklearn.linear_model import Perceptron
-from sklearn import neural_network
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, accuracy_score
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -634,7 +636,7 @@ def assignData(tables, int_year):
 
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2023-combine.htm'), 2020)
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2022-combine.htm'), 2020)
-# assignData(parseHTML('https://www.pro-football-reference.com/draft/2021-combine.htm'), 2020)
+assignData(parseHTML('https://www.pro-football-reference.com/draft/2021-combine.htm'), 2020)
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2020-combine.htm'), 2020)
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2019-combine.htm'), 2020)
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2018-combine.htm'), 2020)
@@ -798,10 +800,27 @@ wr_stats = readCSV(getFileName('WR'), 'WR')
 print(wr_stats)
 
 
+# classify z = x * w + b
 
+# pass into softmax y^c = e^zi (z of that class) / sum e^z for each class
 
+# cross entropy loss =
 
+# stochastic gradient descent (update weights)
+class Multi_Perceptron():
 
+    def __init__(self, data):
+        self.data = data
+        self.model = database_model()
+
+    def database_model(self):
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+        perceptron = Perceptron(max_iter=1000, tol=1e-3, random_state=42)
+        perceptron.fit(x_train, y_train)
+        return perceptron
+
+    def predict(self, example):
+        return self.model.predict(example)
 
 
 class MulticlassPerceptron():
