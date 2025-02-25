@@ -22,9 +22,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy.sql.util import expand_column_list_from_order_by
 
 
-# todo: fix nfl stats so they read from an alternate site if no stats are found
-# todo: make sure that
-# read in csv data
+
+#todo: pass into model and predict
+#todo: create api that connects to react frontend
+#todo: potentially host data on a database for frontend so the website is more customizable
+
+
 
 
 #todo: train model on multiple years of data (only one position per training)
@@ -37,10 +40,15 @@ from sqlalchemy.sql.util import expand_column_list_from_order_by
 # account for missing data with null values/Average value placement
 # get a scale value like height 5'5-7 feet
 
-
+n_count = 0
 
 
 def parse_name_index(name):
+    global n_count
+    if n_count > 5:
+        time.sleep(10)
+        n_count = 0
+    n_count += 1
     split_name = name.split(' ')
     base_url = 'https://www.pro-football-reference.com/players/'
     base_url2 = 'https://www.pro-football-reference.com'
@@ -49,6 +57,7 @@ def parse_name_index(name):
 
     name = name.title()
     new_url = base_url + last_name + '/'
+    print('checking index')
 
     page = requests.get(new_url)
     soup = BeautifulSoup(page.content, 'html.parser')
@@ -59,6 +68,7 @@ def parse_name_index(name):
             split_u = st_url.split('href="')
             split_again = split_u[1].split('.htm')
             return base_url2 + split_again[0] + '/splits/'
+
     return new_url
 
 
@@ -512,7 +522,7 @@ def cipherCollegeStats(url, pos):
     return stats
 
 def file_name(pos):
-    return str(pos) + '2.csv'
+    return str(pos) + '3.csv'
 
 def exists(name):
     return os.path.exists(name)
@@ -587,6 +597,7 @@ def assignData(tables, int_year):
     attributes = {'forty_yd', 'height', 'pos', 'weight', 'shuttle', 'cone', 'broad_jump', 'bench_reps', 'vertical'}
     pos = {'TE' : False, 'WR' : False, 'RB' : False, 'QB' : False, 'LB' : False, 'DB' : False, 'EDGE' : False, 'S' : False, 'CB' : False, 'DE' : False}
     defense = {'LB', 'EDGE', 'DE', 'DT', 'DB', 'CB'}
+    player_counter = 1
     player = {}
     for table in tables:
         for row in table:
@@ -612,7 +623,7 @@ def assignData(tables, int_year):
             elif dos == 'college':
                 try:
                     words = (row.attrs['href']).split('players/')
-                    if len(words) > 1 and categories(player['pos']) != -1:
+                    if len(words) > 1 and categories(player['pos']) != -1 and player['pos'] == 'WR':
                         name = words[1]
                         names = name.split('-')
                         nfl_name = names[0] + ' ' + names[1]
@@ -623,6 +634,8 @@ def assignData(tables, int_year):
                             position = 'DEF'
                         nfl_s = cipher_nfl_stats(parse_name_index(nfl_name), position)
                         rat = calculateRating(position, nfl_s)
+                        print(player_counter, ' count')
+                        player_counter += 1
                         player['nfl'] = rat
                         college_stats = cipherCollegeStats(college_stats_url + college_name + college_stats_part2, stats(player['pos']))
                         if not outlier(college_stats, player['pos']):
@@ -634,19 +647,13 @@ def assignData(tables, int_year):
     return player
     # do an if
 
-# assignData(parseHTML('https://www.pro-football-reference.com/draft/2023-combine.htm'), 2020)
-# assignData(parseHTML('https://www.pro-football-reference.com/draft/2022-combine.htm'), 2020)
-assignData(parseHTML('https://www.pro-football-reference.com/draft/2021-combine.htm'), 2020)
-# assignData(parseHTML('https://www.pro-football-reference.com/draft/2020-combine.htm'), 2020)
-# assignData(parseHTML('https://www.pro-football-reference.com/draft/2019-combine.htm'), 2020)
-# assignData(parseHTML('https://www.pro-football-reference.com/draft/2018-combine.htm'), 2020)
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2017-combine.htm'), 2020)
-
-# perceptron (true = draft, false = don't)
-
-# need to parse stats to be able to pass in nfl and college stats to signify success or failure
-# need to normalize values so that the perceptron can classify based on feature category
-
+# assignData(parseHTML('https://www.pro-football-reference.com/draft/2016-combine.htm'), 2020)
+# assignData(parseHTML('https://www.pro-football-reference.com/draft/2015-combine.htm'), 2020)
+# assignData(parseHTML('https://www.pro-football-reference.com/draft/2014-combine.htm'), 2020)
+# assignData(parseHTML('https://www.pro-football-reference.com/draft/2013-combine.htm'), 2020)
+# assignData(parseHTML('https://www.pro-football-reference.com/draft/2012-combine.htm'), 2020)
+# assignData(parseHTML('https://www.pro-football-reference.com/draft/2011-combine.htm'), 2020)
 
 # list of vectors used to maintain player data
 player_stats = []
@@ -671,7 +678,7 @@ def clean(word):
 
 def getFileName(pos):
     base = pos.upper()
-    return base + '2.csv'
+    return base + '3.csv'
 
 def max_count(pos):
     if pos == 'QB':
@@ -695,7 +702,7 @@ def max_length(pos):
 
 def pad(vec, max_length):
     while len(vec) < max_length:
-        vec.append(0)
+        vec.append(.5)
 
 # normalizes stat value to 0, 1 range
 def normalize_stat(count, mins, val):
@@ -707,43 +714,158 @@ def normalize_stat(count, mins, val):
         min = max - 1
     return (val - min) / (max - min)
 
-# gathers min and max value for each category (used for normalization
+
+
+def stat_outlier(count, attr):
+    if count == 0:
+        try:
+            speed = float(attr)
+            if speed > 4 and speed < 7:
+                return False
+        except TypeError:
+            return True
+        return True
+    elif count == 1:
+        try:
+            speed = float(attr)
+            if speed > 5.4 and speed < 7.4:
+                return False
+        except TypeError:
+            return True
+        return True
+    elif count == 2:
+        try:
+            speed = float(attr)
+            if speed > 130 and speed < 500:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    elif count == 3:
+        try:
+            speed = float(attr)
+            if speed > 3 and speed < 7:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    if count == 4:
+        try:
+            speed = float(attr)
+            if speed > 4 and speed < 9:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    if count == 5:
+        try:
+            speed = float(attr)
+            if speed > 80 and speed < 150:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    if count == 6:
+        try:
+            speed = float(attr)
+            if speed > 8 and speed < 50:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    if count == 7:
+        try:
+            speed = float(attr)
+            if speed > 10 and speed < 600:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    if count == 8:
+        try:
+            speed = float(attr)
+            if speed > 50:
+                return False
+        except TypeError:
+            return True
+        return True
+
+    return False
+# gathers min and max value for each category (used for normalization)
+# also gathers mean for category
 def normalize(pos, fn):
+    #fn = file name
     # val - min / max - min
-    minmax = {}
+    minmax = {} # tracks min and max of each attr
+    mean = {} # tracks mean of each attr
+    # mean : {count : [val, count]}
     with open(fn, mode='r') as file:
         reader = csv.reader(file)
         count = 0
         classification = False
+        nextWord = True
         for w in reader:
             for st in w:
                 clean_word = clean(st)
                 if st == pos:
                     count = 0
-                if clean_word != False and clean_word != 0 and clean_word is not None:
+                    nextWord = False
+                try:
+                    if not clean_word == '6' and clean_word != '4':
+                        if clean_word == '0' or (float(clean_word) < 7 and float(clean_word) > 3.5) and not st[1] == '-':
+                            nextWord = True
+                except TypeError or IndexError:
+                    print('type error')
+                if clean_word != False and clean_word != '0' and clean_word is not None and nextWord:
                         if st == pos:
                             classification = True
                             count += 1
                         elif classification:
                             count = 0
                             classification = False
+                            nextWord = False
                         else:
                             val = float(clean_word)
-                            if count in minmax:
-                                if val != 0:
-                                    if count in minmax:
-                                        if val < minmax[count][0]:
-                                            minmax[count][0] = val
-                                        elif val > minmax[count][1]:
-                                            minmax[count][1] = val
-                            else:
-                                if val != 0:
-                                    mins = [val, val]
-                                    minmax[count] = mins
+                            if val > 25 and count == 1:
+                                print(1)
+                            if not stat_outlier(count, clean_word) and count < 16:
+                                if count in minmax:
+                                    if val != 0:
+                                        if count in minmax:
+                                            if val < minmax[count][0]:
+                                                minmax[count][0] = val
+                                            elif val > minmax[count][1]:
+                                                minmax[count][1] = val
+                                            mean[count][0] += val
+                                            mean[count][1] += 1
+                                else:
+                                    if val != 0:
+                                        mins = [val, val]
+                                        minmax[count] = mins
+                                    mean[count] = [val, 1]
                             count += 1
-    return minmax
+                if clean_word == '0':
+                    count += 1
+    return minmax, mean
 
-# normalize('WR', getFileName('WR'))
+# should probably check if it's within the range and if it's not, just output mean, also get rid of no classifiers
+
+
+#check to see if more than 5 elements of a vector are missing (inserted as mean)
+def five_count(stats):
+    five_count = 0
+    for st in stats:
+        if st == .5:
+            five_count += 1
+    return five_count > 5
+
+
 
 # reads in csv of specified position, and outputs a list of each training vector
 # fn = file name
@@ -752,7 +874,10 @@ def readCSV(fn, pos):
     global player_stats
 
     # min and max for each value category
-    min_max = normalize(pos, fn)
+    norms = normalize(pos, fn)
+    min_max = norms[0]
+    means = norms[1]
+
 
     test_stats = []
     with open(fn, mode='r') as file:
@@ -764,12 +889,21 @@ def readCSV(fn, pos):
         for row in reader:
             for word in row:
                 clean_word = clean(word)
-                if count == 11:
-                    q = 1
                 if word == pos:
                     count = 0
                     classification = True
-                if clean_word != False and clean_word != 0 and clean_word is not None or classification:
+                    continue
+                try:
+                    float_val = float(clean_word)
+                    min = min_max[count][0]
+                    max = min_max[count][1]
+                    if count < 11 and (float_val < min or float_val > max) and clean_word != False:
+                        vec.append(.5)
+                        count += 1
+                        continue
+                except TypeError:
+                    print('type error')
+                if (clean_word != False and clean_word != '0' and clean_word is not None and not stat_outlier(count, clean_word)) or classification:
                     if word == pos:
                         player_stats.append(vec)
                         classification = True
@@ -780,24 +914,25 @@ def readCSV(fn, pos):
                         total_vec.append(vec)
                         total_vec.append(word)
                         # player_stats.append(total_vec)
-                        test_stats.append(total_vec)
+                        if not five_count(vec) and word[0].isalpha():
+                            test_stats.append(total_vec)
                         vec = []
                         total_vec = []
                         classification = False
-                    else:
+                    elif count < 11:
                         clean_word = clean(word)
-                        if clean_word != False:
-                            # normalizes stat value
-                            norm_word = normalize_stat(count, min_max, float(clean_word))
-                            vec.append(norm_word)
+                        # normalizes stat value
+                        norm_word = normalize_stat(count, min_max, float(clean_word))
+                        vec.append(norm_word)
                         count += 1
+                elif word == '[]':
+                    pad(vec, 11)
+                elif clean_word == '0' or clean_word == 0 and not clean_word == False:
+                    vec.append(.5)
         print(test_stats)
         return test_stats
 
-readCSV(getFileName('WR'), 'WR')
-
-wr_stats = readCSV(getFileName('WR'), 'WR')
-print(wr_stats)
+# if classification != str or .5 count > 6, throw out
 
 
 # classify z = x * w + b
@@ -807,14 +942,19 @@ print(wr_stats)
 # cross entropy loss =
 
 # stochastic gradient descent (update weights)
-class Multi_Perceptron():
+class multiPerceptron():
 
     def __init__(self, data):
         self.data = data
-        self.model = database_model()
+        self.x_list = []
+        self.y_list = []
+        for x, y in data:
+            self.x_list.append(x)
+            self.y_list.append(y)
+        self.model = self.database_model()
 
     def database_model(self):
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+        x_train, x_test, y_train, y_test = train_test_split(self.x_list, self.y_list, test_size=0.3, random_state=42)
         perceptron = Perceptron(max_iter=1000, tol=1e-3, random_state=42)
         perceptron.fit(x_train, y_train)
         return perceptron
@@ -862,3 +1002,14 @@ class MulticlassPerceptron():
 
 
 
+complete_set = readCSV(getFileName('WR'), 'WR')
+print(complete_set)
+
+perc = multiPerceptron(complete_set)
+
+aj_stats = [4.49, 6.1, 226, ]
+
+perc.predict()
+
+# wr_stats = readCSV(getFileName('WR'), 'WR')
+# percept = multiPerceptron(wr_stats)
