@@ -12,6 +12,8 @@ from sklearn.linear_model import Perceptron
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, accuracy_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -707,7 +709,7 @@ def pad(vec, max_length):
 # normalizes stat value to 0, 1 range
 def normalize_stat(count, mins, val):
     if val == 0:
-        return 0
+        return .5
     min = mins[count][0]
     max = mins[count][1]
     if max == min:
@@ -821,7 +823,7 @@ def normalize(pos, fn):
                         if clean_word == '0' or (float(clean_word) < 7 and float(clean_word) > 3.5) and not st[1] == '-':
                             nextWord = True
                 except TypeError or IndexError:
-                    print('type error')
+                    f = 1
                 if clean_word != False and clean_word != '0' and clean_word is not None and nextWord:
                         if st == pos:
                             classification = True
@@ -902,7 +904,7 @@ def readCSV(fn, pos):
                         count += 1
                         continue
                 except TypeError:
-                    print('type error')
+                    g = 1
                 if (clean_word != False and clean_word != '0' and clean_word is not None and not stat_outlier(count, clean_word)) or classification:
                     if word == pos:
                         player_stats.append(vec)
@@ -951,16 +953,63 @@ class multiPerceptron():
         for x, y in data:
             self.x_list.append(x)
             self.y_list.append(y)
+        self.x_test = []
+        self.y_test = []
         self.model = self.database_model()
+
 
     def database_model(self):
         x_train, x_test, y_train, y_test = train_test_split(self.x_list, self.y_list, test_size=0.3, random_state=42)
-        perceptron = Perceptron(max_iter=1000, tol=1e-3, random_state=42)
+        self.x_test = x_test
+        self.y_test = y_test
+        perceptron = Perceptron(max_iter=1000, tol=1e-3, random_state=42, class_weight='balanced')
         perceptron.fit(x_train, y_train)
         return perceptron
 
     def predict(self, example):
         return self.model.predict(example)
+
+
+class logisticRegression():
+    def __init__(self, data):
+        self.data = data
+        self.x_list = []
+        self.y_list = []
+        for x, y in data:
+            self.x_list.append(x)
+            self.y_list.append(y)
+        self.x_test = []
+        self.y_test = []
+        self.model = self.database_model()
+
+    def database_model(self):
+        x_train, x_test, y_train, y_test = train_test_split(self.x_list, self.y_list, test_size=0.3, random_state=42)
+        self.x_test = x_test
+        self.y_test = y_test
+        perceptron = LogisticRegression(max_iter=1000, class_weight='balanced', multi_class='multinomial')
+        perceptron.fit(x_train, y_train)
+        return perceptron
+
+
+class randomForest():
+    def __init__(self, data):
+        self.data = data
+        self.x_list = []
+        self.y_list = []
+        for x, y in data:
+            self.x_list.append(x)
+            self.y_list.append(y)
+        self.x_test = []
+        self.y_test = []
+        self.model = self.database_model()
+
+    def database_model(self):
+        x_train, x_test, y_train, y_test = train_test_split(self.x_list, self.y_list, test_size=0.3, random_state=42)
+        self.x_test = x_test
+        self.y_test = y_test
+        perceptron = RandomForestClassifier(n_estimators=200, class_weight='balanced', random_state=42)
+        perceptron.fit(x_train, y_train)
+        return perceptron
 
 
 class MulticlassPerceptron():
@@ -1001,15 +1050,45 @@ class MulticlassPerceptron():
         return prediction
 
 
-
 complete_set = readCSV(getFileName('WR'), 'WR')
-print(complete_set)
+# print(complete_set)
 
 perc = multiPerceptron(complete_set)
 
-aj_stats = [4.49, 6.1, 226, ]
 
-perc.predict()
+accuracy = perc.model.score(perc.x_test, perc.y_test)
+print('Multiclass perceptron: ', accuracy)
 
-# wr_stats = readCSV(getFileName('WR'), 'WR')
-# percept = multiPerceptron(wr_stats)
+
+logistic = logisticRegression(complete_set)
+predictions = logistic.model.predict(logistic.x_test)
+multiclass_predictions = perc.model.predict(perc.x_test)
+
+forest = randomForest(complete_set)
+forest_predictions = forest.model.predict(forest.x_test)
+print(forest_predictions, ' forest prediction')
+print(forest.y_test, ' actual classifications')
+
+# Evaluate performance
+from sklearn.metrics import classification_report
+print(classification_report(logistic.y_test, predictions))
+print(classification_report(perc.y_test, multiclass_predictions))
+print(classification_report(forest.y_test, forest_predictions))
+
+
+# Multiclass perceptron initial accuracy: 61.39% parameters: max_iter=1000, tol=1e-3, random_state=42
+# beware, could just be predicting bust every time, and 61% of players are just busts
+
+
+
+norms = normalize('WR', getFileName('WR'))
+min_max = norms[0]
+aj_stats = [4.57, 6.2, 201.0, 4.36, 7.32, 120.1, 19.0, 33.0, 107, 1749, 14]
+norm_stats_aj = []
+count = 0
+for x in range(11):
+    norm_stats_aj.append(normalize_stat(count, min_max, aj_stats[count]))
+    count += 1
+print(norm_stats_aj, 'aj stats')
+prediction = forest.model.predict([norm_stats_aj])
+print(prediction, ' Aj prediction')
