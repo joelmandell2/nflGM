@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Container, Divider, Link } from '@mui/material';
-import { NavLink } from 'react-router-dom';
 
+
+import LazyTable from '../components/lazytable';
+const config = require('../config.json');
 
 
 // export means other functions can use it
@@ -30,18 +32,34 @@ export default function HomePage () {
             // player is the element in the array that is being iterated over
             // sets current player to playerData
             const playerData = resJson.map((player) => {
-                ({id : player.player_id, ... player}) 
+                return ({id : player.player_id, ... player}) 
             });
             setSelectedPlayer(playerData);
         })
 
     }, [position, draftYear]);
 
+
+    // field is the name of the attribute you get from the database
+    // headername is what it's called outside
+    const playerColumns = [
+        {
+            field: 'name',
+            headerName: 'Player Name'
+        },
+        {
+            field: 'yards',
+            headerName: 'Player Yards'
+        }
+    ];
+
     // the html that the page actually returns
+    // probably need to fix lazy table route
     return(
         <Container>
             <Divider />
             <h2>Here is the table that will go here</h2>
+            <LazyTable route={`http://${config.server_host}:${config.server_port}/players`} columns={playerColumns} />
             <Divider />
         </Container>
     );
