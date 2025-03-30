@@ -595,6 +595,10 @@ def written(pos, cat):
 # overall data assignment, call this method to take in a table full of draft data
 # returns a tuple with dictionary with keys = testing attribute and value = the player's value, alongside what class
 # that player was classified as
+    
+
+
+# need to adjust so that it assigns names and draft year 
 def assignData(tables, int_year):
     attributes = {'forty_yd', 'height', 'pos', 'weight', 'shuttle', 'cone', 'broad_jump', 'bench_reps', 'vertical'}
     pos = {'TE' : False, 'WR' : False, 'RB' : False, 'QB' : False, 'LB' : False, 'DB' : False, 'EDGE' : False, 'S' : False, 'CB' : False, 'DE' : False}
@@ -648,6 +652,11 @@ def assignData(tables, int_year):
                     print('AttributeError')
     return player
     # do an if
+
+
+
+assignData(parseHTML('https://www.pro-football-reference.com/draft/2015-combine.htm'), 2025)
+
 
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2017-combine.htm'), 2020)
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2016-combine.htm'), 2020)

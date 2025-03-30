@@ -15,10 +15,21 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
   // need to re-fetch the data if any of these values change
   useEffect(() => {
     console.log(page, ' page', pageSize, ' page size');
-    fetch(`${route}?page=${page}&page_size=${pageSize}`)
+    console.log(route, ' route FETCHING');
+    // fetch(`${route}?page=${page}&page_size=${pageSize}`)
+
+    fetch(`${route}`)
       .then(res => res.json())
-      .then(resJson => setData(resJson));
+      .then(resJson => {
+        console.log('Fetched draft year response:', resJson); // Log to debug
+    // Check if resJson is an array, otherwise look for players property
+        const dataArray = Array.isArray(resJson) ? resJson : resJson.players || [];
+        setData(dataArray);
+    });
+    
+    
   }, [route, page, pageSize]);
+
 
   const handleChangePage = (e, newPage) => {
     // Can always go to previous page (TablePagination prevents negative pages)
@@ -58,23 +69,23 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
                     <TableRow key={idx}>
                         {
                             columns.map( col => 
-                                <TableCell>
-                                    {col.renderCell(row) ? col.renderCell : defaultRenderCell(col, row)}
-                                </TableCell>
+                            <TableCell key={col.headerName}>
+                            {col.renderCell ? col.renderCell(row) : defaultRenderCell(col, row)}
+                            </TableCell>
                             )
                         }
                     </TableRow>
                 )}
             </TableBody>
-            <TablePagination 
-                rowsPerPageOptions={rowsPerPageOptions ?? [5, 10, 25]}
-                count={-1}
-                rowsPerPage={pageSize}
-                page={page - 1}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangePageSize}
-            />
         </Table>
+        <TablePagination 
+                  rowsPerPageOptions={rowsPerPageOptions ?? [5, 10, 25]}
+                  count={-1}
+                  rowsPerPage={pageSize}
+                  page={page - 1}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangePageSize}
+              />
      </TableContainer>
    ) 
 }

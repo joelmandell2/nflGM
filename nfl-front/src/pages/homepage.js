@@ -25,17 +25,23 @@ export default function HomePage () {
     useEffect( () => {
         // returns a promise for an object (basically like saying that object will be ther in the future)
         // then is called on that object once it is returned
-        fetch(`http://${config.server_host}${config.server_port}/draft_year?year=${draftYear}&position=${position}`)
+        console.log('about to fetch from :', config.server_host, config.server_port);
+        
+        fetch(`http://${config.server_host}:${config.server_port}/draft_year?year=${draftYear}&position=${position}`)
         .then(res => res.json())
         .then(resJson => {
-            // the map function applies whatever you tell it to do to each value element in array you're calling it on (resJson)
-            // player is the element in the array that is being iterated over
-            // sets current player to playerData
-            const playerData = resJson.map((player) => {
-                return ({id : player.player_id, ... player}) 
-            });
-            setSelectedPlayer(playerData);
+                // the map function applies whatever you tell it to do to each value element in array you're calling it on (resJson)
+                // player is the element in the array that is being iterated over
+                // sets current player to playerData
+                console.log('Fetched draft year response:', resJson); // Log to debug
+                // Check if resJson is an array, otherwise look for players property
+                const dataArray = Array.isArray(resJson) ? resJson : resJson.players || [];
+                const playerData = dataArray.map((player) => {
+                    return ({id: player.player_id || Math.random(), ...player});
+                });
+                setSelectedPlayer(playerData);
         })
+        
 
     }, [position, draftYear]);
 
@@ -45,11 +51,11 @@ export default function HomePage () {
     const playerColumns = [
         {
             field: 'name',
-            headerName: 'Player Name'
+            headerName: 'Player'
         },
         {
             field: 'yards',
-            headerName: 'Player Yards'
+            headerName: 'yards'
         }
     ];
 
@@ -59,7 +65,7 @@ export default function HomePage () {
         <Container>
             <Divider />
             <h2>Here is the table that will go here</h2>
-            <LazyTable route={`http://${config.server_host}:${config.server_port}/players`} columns={playerColumns} />
+            <LazyTable route={`http://${config.server_host}:${config.server_port}/player`} columns={playerColumns} />
             <Divider />
         </Container>
     );
