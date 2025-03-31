@@ -16,7 +16,7 @@ export default function HomePage () {
     
     // use state returns both the variable value a function to set it in the future
     const [draftYear, setDraftYear] = useState(2025);
-    const [position, setPosition] = useState('QB');
+    const [position, setPosition] = useState('WR');
     const [selectedPlayer, setSelectedPlayer] = useState(null);
 
     // use effect is a function that takes in the definition of another funciton
@@ -54,9 +54,40 @@ export default function HomePage () {
             headerName: 'Player'
         },
         {
-            field: 'yards',
-            headerName: 'yards'
-        }
+            field: 'Height',
+            headerName: 'Height'
+        },
+        {
+            field: 'Weight',
+            headerName: 'Weight'
+        },
+        {
+            field: '40 Yard Dash',
+            headerName: '40 Yard Dash'
+        },
+        {
+            field: 'Shuttle',
+            headerName: 'Shuttle'
+        },
+        {
+            field: '3 Cone',
+            headerName: '3 Cone'
+        },
+        {
+            field: 'Broad Jump',
+            headerName: 'Broad Jump'
+        },
+        {
+            field: 'Bench',
+            headerName: 'Bench Press'
+        },
+        {
+            field: 'Vertical',
+            headerName: 'Vertical'
+        },
+        
+        
+
     ];
 
     // the html that the page actually returns
@@ -64,8 +95,7 @@ export default function HomePage () {
     return(
         <Container>
             <Divider />
-            <h2>Here is the table that will go here</h2>
-            <LazyTable route={`http://${config.server_host}:${config.server_port}/player`} columns={playerColumns} />
+            <LazyTable route={`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}`} columns={playerColumns} onYearChange={setDraftYear} onPositionChange={setPosition}/>
             <Divider />
         </Container>
     );

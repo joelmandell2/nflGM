@@ -45,6 +45,9 @@ from sqlalchemy.sql.util import expand_column_list_from_order_by
 n_count = 0
 
 
+
+
+
 def parse_name_index(name):
     global n_count
     if n_count > 5:
@@ -523,8 +526,8 @@ def cipherCollegeStats(url, pos):
         print('Type Error')
     return stats
 
-def file_name(pos):
-    return str(pos) + '3.csv'
+def file_name(pos, year):
+    return str(pos) + str(year) + '.csv'
 
 def exists(name):
     return os.path.exists(name)
@@ -614,22 +617,27 @@ def assignData(tables, int_year):
                 temp2 = temp[1].split('">')
                 word = temp2[0]
             if dos == 'pos':
-                if categories(word) != -1:
-                    file_n = file_name(word)
+                if 'pos' in player:
+                    maps.append(player)
+                    file_n = file_name(player['pos'], int_year)
+                    with open(file_n, 'a') as file:
+                        for key, val in player.items():
+                            file.write(str(val) + ',')
+                    player = {'forty_yd' : 0, 'height' : 0, 'weight' : 0, 'shuttle' : 0, 'cone' : 0, 'broad_jump' : 0, 'bench_reps' : 0, 'vertical' : 0, 'college' : 0}
                 player[dos] = word
             elif dos in attributes:
                 player[dos] = word
-            if dos == 'draft_info' and 'pos' in player:
-                maps.append(player)
-                file_n = file_name(player['pos'])
-                with open(file_n, 'a') as file:
-                    for key, val in player.items():
-                        file.write(str(val) + ',')
-                player = {'forty_yd' : 0, 'height' : 0, 'weight' : 0, 'shuttle' : 0, 'cone' : 0, 'broad_jump' : 0, 'bench_reps' : 0, 'vertical' : 0, 'college' : 0}
+            # if dos == 'draft_info' and 'pos' in player:
+            #     maps.append(player)
+            #     file_n = file_name(player['pos'], int_year)
+            #     with open(file_n, 'a') as file:
+            #         for key, val in player.items():
+            #             file.write(str(val) + ',')
+            #     player = {'forty_yd' : 0, 'height' : 0, 'weight' : 0, 'shuttle' : 0, 'cone' : 0, 'broad_jump' : 0, 'bench_reps' : 0, 'vertical' : 0, 'college' : 0}
             elif dos == 'college':
                 try:
                     words = (row.attrs['href']).split('players/')
-                    if len(words) > 1 and categories(player['pos']) != -1 and player['pos'] == 'WR':
+                    if len(words) > 1 and categories(player['pos']) != -1 and player['pos'] == 'WR' or player['pos'] == 'RB' or player['pos'] == 'TE' or player['pos'] == 'QB':
                         name = words[1]
                         names = name.split('-')
                         nfl_name = names[0] + ' ' + names[1]
@@ -645,8 +653,10 @@ def assignData(tables, int_year):
                         player['nfl'] = rat
                         college_stats = cipherCollegeStats(college_stats_url + college_name + college_stats_part2, stats(player['pos']))
                         if not outlier(college_stats, player['pos']):
+                            player['name'] = nfl_name
                             player['college'] = college_stats
                         else:
+                            player['name'] = nfl_name
                             player['college'] = 0
                 except AttributeError:
                     print('AttributeError')
@@ -655,7 +665,7 @@ def assignData(tables, int_year):
 
 
 
-assignData(parseHTML('https://www.pro-football-reference.com/draft/2015-combine.htm'), 2025)
+assignData(parseHTML('https://www.pro-football-reference.com/draft/2017-combine.htm'), 2017)
 
 
 # assignData(parseHTML('https://www.pro-football-reference.com/draft/2017-combine.htm'), 2020)
@@ -1090,14 +1100,14 @@ print(classification_report(forest.y_test, forest_predictions))
 
 
 
-norms = normalize('WR', getFileName('WR'))
-min_max = norms[0]
-aj_stats = [4.57, 6.2, 201.0, 4.36, 7.32, 120.1, 19.0, 33.0, 107, 1749, 14]
-norm_stats_aj = []
-count = 0
-for x in range(11):
-    norm_stats_aj.append(normalize_stat(count, min_max, aj_stats[count]))
-    count += 1
-print(norm_stats_aj, 'aj stats')
-prediction = forest.model.predict([norm_stats_aj])
-print(prediction, ' Aj prediction')
+# norms = normalize('WR', getFileName('WR'))
+# min_max = norms[0]
+# aj_stats = [4.57, 6.2, 201.0, 4.36, 7.32, 120.1, 19.0, 33.0, 107, 1749, 14]
+# norm_stats_aj = []
+# count = 0
+# for x in range(11):
+#     norm_stats_aj.append(normalize_stat(count, min_max, aj_stats[count]))
+#     count += 1
+# print(norm_stats_aj, 'aj stats')
+# prediction = forest.model.predict([norm_stats_aj])
+# print(prediction, ' Aj prediction')

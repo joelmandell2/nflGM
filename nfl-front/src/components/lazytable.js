@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow , MenuItem, FormControl, InputLabel, Select, Box} from '@mui/material';
 
 
 
-export default function LazyTable({route, columns, defaultPageSize, rowsPerPageOptions}){
+export default function LazyTable({route, columns, defaultPageSize, rowsPerPageOptions, onYearChange, onPositionChange}){
     // 
     const [data, setData] = useState([]);
 
     const [page, setPage] = useState(1); // 1 indexed
     const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
+    const [draftYear, setDraftYear] = useState(2025);
+    const [position, setPosition] = useState('WR');
 
 
       // Now notice the dependency array contains route, page, pageSize, since we
@@ -55,9 +57,61 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
         return <div>{row[col.field]}</div>;
     }
 
+    const yearChange = (newYear) => {
+      const year = newYear.target.value;
+      setDraftYear(year);
+      onYearChange(year);
+    };
+
+    const positionChange = (newPos) => {
+      const p = newPos.target.value;
+      setPosition(p);
+      onPositionChange(p);
+    }
+
 
    return(
      <TableContainer>
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, my: 4 }}>
+      <FormControl sx={{ m: 1, minWidth: 120 }}>
+        <InputLabel id="demo-simple-select-helper-label">Year</InputLabel>
+        <Select
+          labelId="demo-simple-select-helper-label"
+          id="demo-simple-select-helper"
+          value={draftYear}
+          label="Year"
+          onChange={yearChange}
+        >
+          <MenuItem value="">
+            {/* <em>None</em> */}
+          </MenuItem>
+          <MenuItem value={2025}>2025</MenuItem>
+          <MenuItem value={2024}>2024</MenuItem>
+          <MenuItem value={2023}>2023</MenuItem>
+          <MenuItem value={2022}>2022</MenuItem>
+          <MenuItem value={2021}>2021</MenuItem>
+          <MenuItem value={2020}>2020</MenuItem>
+          <MenuItem value={2019}>2019</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl sx={{ m: 1, minWidth: 120 }}>
+        <InputLabel id="demo-simple-select-helper-label2">Position</InputLabel>
+        <Select
+          labelId="demo-simple-select-helper-label2"
+          id="demo-simple-select-helper2"
+          value={position}
+          label="Position"
+          onChange={positionChange}
+        >
+          <MenuItem value="">
+          </MenuItem>
+          <MenuItem value={'QB'}>QB</MenuItem>
+          <MenuItem value={'RB'}>RB</MenuItem>
+          <MenuItem value={'WR'}>WR</MenuItem>
+          <MenuItem value={'TE'}>TE</MenuItem>
+        </Select>
+      </FormControl>
+      </Box>
         <Table>
             <TableHead>
                 <TableRow>
