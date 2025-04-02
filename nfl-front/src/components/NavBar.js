@@ -33,12 +33,12 @@ function NavText({ href, text, isMain }) {
 // props to how it changes the look of the component.
 export default function NavBar() {
   return (
-    <AppBar position='static'>
+    <AppBar position='static' sx={{ backgroundColor: '#071249' }}>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
-          <NavText href='/' text='SWIFTIFY' isMain />
-          <NavText href='/albums' text='ALBUMS' />
-          <NavText href='/songs' text='SONGS' />
+          <NavText href='/' text='NFL GM' isMain />
+          <NavText href='/albums' text='PLAYERS' />
+          <NavText href='/songs' text='ABOUT' />
         </Toolbar>
       </Container>
     </AppBar>

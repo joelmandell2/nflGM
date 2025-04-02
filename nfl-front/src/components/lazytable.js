@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow , MenuItem, FormControl, InputLabel, Select, Box} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow , MenuItem, FormControl, InputLabel, Select, Box, Button} from '@mui/material';
 
 
 
-export default function LazyTable({route, columns, defaultPageSize, rowsPerPageOptions, onYearChange, onPositionChange}){
+export default function LazyTable({route, columns, defaultPageSize, rowsPerPageOptions, onYearChange, onPositionChange, onSelectedChange}){
     // 
     const [data, setData] = useState([]);
 
@@ -11,6 +11,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
     const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
     const [draftYear, setDraftYear] = useState(2025);
     const [position, setPosition] = useState('WR');
+    const [attribute, setAttrib] = useState('classification');
 
 
       // Now notice the dependency array contains route, page, pageSize, since we
@@ -23,14 +24,13 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
     fetch(`${route}`)
       .then(res => res.json())
       .then(resJson => {
-        console.log('Fetched draft year response:', resJson); // Log to debug
     // Check if resJson is an array, otherwise look for players property
         const dataArray = Array.isArray(resJson) ? resJson : resJson.players || [];
         setData(dataArray);
     });
     
     
-  }, [route, page, pageSize]);
+  }, [route, page, pageSize, attribute]);
 
 
   const handleChangePage = (e, newPage) => {
@@ -67,6 +67,30 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
       const p = newPos.target.value;
       setPosition(p);
       onPositionChange(p);
+    }
+
+    function attributeChange(value){
+      const a = value;
+      if(attribute == a){
+        setAttrib('classification');
+        onSelectedChange('classification');
+      }
+      else{
+        setAttrib(a);
+        onSelectedChange(a);
+      }
+    }
+
+    function getRandomColor(classification) {
+      if(classification == 'All Pro'){
+        return '#308942';
+      }else if(classification == 'Starter'){
+        return '#1349cc';
+      } else if(classification == 'Below Average Starter'){
+        return '#071249';
+      }
+      return '#010301';
+      
     }
 
 
@@ -115,7 +139,11 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
         <Table>
             <TableHead>
                 <TableRow>
-                    {columns.map(col => <TableCell key={col.headerName}>{col.headerName}</TableCell>)}
+                    {columns.map(col => <TableCell key={col.headerName}>
+                      <Button onClick={()=> attributeChange(col.headerName)} style={{ color: 'black', textTransform: 'none' }}>
+                      {col.headerName}
+                      </Button>
+                      </TableCell>)}
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -123,7 +151,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
                     <TableRow key={idx}>
                         {
                             columns.map( col => 
-                            <TableCell key={col.headerName}>
+                            <TableCell key={col.headerName} sx={{ backgroundColor: getRandomColor(row['classification']), color: 'white' }}>
                             {col.renderCell ? col.renderCell(row) : defaultRenderCell(col, row)}
                             </TableCell>
                             )
