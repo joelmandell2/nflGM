@@ -9,7 +9,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
 
     const [page, setPage] = useState(1); // 1 indexed
     const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
-    const [draftYear, setDraftYear] = useState(2025);
+    const [draftYear, setDraftYear] = useState(2024);
     const [position, setPosition] = useState('WR');
     const [attribute, setAttrib] = useState('classification');
 
@@ -116,6 +116,9 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
           <MenuItem value={2021}>2021</MenuItem>
           <MenuItem value={2020}>2020</MenuItem>
           <MenuItem value={2019}>2019</MenuItem>
+          <MenuItem value={2018}>2018</MenuItem>
+          <MenuItem value={2017}>2017</MenuItem>
+          <MenuItem value={2016}>2016</MenuItem>
         </Select>
       </FormControl>
       <FormControl sx={{ m: 1, minWidth: 120 }}>
@@ -160,14 +163,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
                 )}
             </TableBody>
         </Table>
-        <TablePagination 
-                  rowsPerPageOptions={rowsPerPageOptions ?? [5, 10, 25]}
-                  count={-1}
-                  rowsPerPage={pageSize}
-                  page={page - 1}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangePageSize}
-              />
+       
      </TableContainer>
    ) 
 }
