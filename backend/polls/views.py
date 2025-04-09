@@ -7,25 +7,19 @@ import joblib
 import os
 import re
 
-
-#todo: export models for qb, rb
 #todo: finish player pages
 #todo: custom player creator
-#fix 2021 receiver, 2025 qb
 
 
 #todo: create a three.js model that takes in time 
 # to output a color and based on that color, maps helmet 
 
 
-
-# reads in file and parses out attributes based on position
-# returns a dictionary of trait-val
-
-
 #comparators used to sort based on attribute
 
 def num_convert(x):
+    if x == 'MVP':
+        return 5
     if x == 'All Pro':
         return 4
     if x == 'Starter':
@@ -163,10 +157,14 @@ def load_minmax(position):
     file_name = 'norms.csv'
     if position == 'TE':
         file_name = 'normsTE.csv'
+    elif position == 'RB':
+        file_name = 'normsRB.csv'
+    elif position == 'QB':
+        file_name = 'normsQB.csv'
     # elif position == 'RB':
     #     file_name = 'norms.RB.csv'
     
-    with open('norms.csv', 'r') as file:
+    with open(file_name, 'r') as file:
         count = 0
         prevWord = ''
         for str in file:
@@ -187,19 +185,25 @@ def load_minmax(position):
 
 # read in normalized values 
 def normalize(key, val, position):
-    if val == 0 or val == ' ':
+    if val == 0 or val == ' ' or val == '':
         return .5
+    print(key, val, ' key, val in normalize')
     # need to read in these values
     minmax = load_minmax(position)
     if key == 'Receptions':
         key = 'Rec'
     if key == 'Height':
-        val = str(val).replace('-', '.')
+        if val == '5-11' or val == '5-10':
+            val = 5.99
+        else:
+            val = str(val).replace('-', '.')
     min = float(minmax[key][0])
     max = float(minmax[key][1])
+    print(min, max, key, ' min max')
     if max == min:
         min = max - 1
     output = (float(val) - float(min)) / (float(max) - float(min))
+    print(output, key, ' normalized output key')
     return output
 
 
@@ -209,14 +213,18 @@ def normalize(key, val, position):
 def getVector(vals, position):
     normalized_list = []
     for key, val in vals.items():
+        print(key, val, ' key val being tested')
         if key == 'name':
+            print(normalized_list, ' returned normalized list')
             return normalized_list
         new_val = normalize(key, val, position)
         new_val = max(new_val, 0.0)
+        print(new_val, key, ' normalized value, key')
         normalized_list.append(new_val)
     if len(normalized_list) < 11:
         while len(normalized_list < 11):
             normalized_list.append(.5)
+    print(normalized_list, ' returned normalized list')
     return normalized_list
 
 
@@ -228,20 +236,46 @@ def random_prediction(js, position):
 
     forest_wr_model = joblib.load('random_forest_model_wr.pkl')
     logistic_wr_model = joblib.load('logistic_model_wr.pkl')
+    qb_model = joblib.load('logistic_model_qb.pkl')
+    rb_model = joblib.load('perc_model_rb.pkl')
+    te_model = joblib.load('perc_model_te.pkl')
     #need to read in min/max/mean values
+
+    # need to switch model based off of position
+
     vec = getVector(js, position)
+    print(vec, ' vector finally returned')
     x = len(vec)
-    while x < 11:
-        vec.append(.5)
-        x = len(vec)
-    forest_prediction = forest_wr_model.predict([vec])
-    try:
-        # print(forest_prediction, ' FOREST PREDICTION')
-        if forest_prediction != 'All Pro' or forest_prediction != 'Backup':
-            return logistic_wr_model.predict([vec])
-        return forest_prediction
-    except Exception as e:
-        print(e, ' error')
+    if position == 'RB':
+        while x < 12:
+            vec.append(.5)
+            x = len(vec)
+        rb_prediction = rb_model.predict([vec])
+        return rb_prediction
+    elif position == 'TE':
+        while x < 11:
+            vec.append(.5)
+            x = len(vec)
+        return te_model.predict([vec])
+    elif position == 'QB':
+        while x < 16:
+            print('appending extra')
+            vec.append(.5)
+            x = len(vec)
+        qb_prediction = qb_model.predict([vec])
+        return qb_prediction
+    else:
+        while x < 11:
+            vec.append(.5)
+            x = len(vec)
+        forest_prediction = forest_wr_model.predict([vec])
+        try:
+            # print(forest_prediction, ' FOREST PREDICTION')
+            if forest_prediction != 'All Pro' or forest_prediction != 'Backup':
+                return logistic_wr_model.predict([vec])
+            return forest_prediction
+        except Exception as e:
+            print(e, ' error')
 
     # need to pass in vectors to the model
     num = random.randint(1, 5)
@@ -264,6 +298,7 @@ def search_file(position, year, name):
 #reads in file
 def read_file(file_name, sortBy, position):
     json_vals = []
+    print(file_name, ' reading from file')
     
     categories = ['Forty', 'Height', 'Weight', 'Shuttle', 'Cone', 'Broad', 'Bench', 'Vertical']
 
@@ -277,28 +312,39 @@ def read_file(file_name, sortBy, position):
                     val = f
                     if val == '0':
                         val = ' '
+                    if count == 2 and (val == '5-10' or val == '5-11'):
+                        val = 5.99
                     player_vals[categories[count]] = val
-                elif count < 22 and count > 8:
+                elif count < 26 and count > 8:
                     val = f
                     val = re.sub(r'[^0-9.]', '', val)
-                    print(val, count, ' count, val')
                     if position == 'RB':
+                        print('position = rb, value: ', val, ' count : ', count)
+                        if count == 9:
+                            player_vals['Rec'] = val
+                        elif count == 11:
+                            player_vals['Yards'] = val
+                        elif count == 13:
+                            player_vals['avg'] = val
+                        elif count == 15:
+                            player_vals['Touchdowns'] = val
+                    elif position == 'QB':
                         if count == 9:
                             player_vals['att'] = val
                         elif count == 11:
-                            player_vals['yds'] = val
+                            player_vals['pct'] = val
                         elif count == 13:
-                            player_vals['avg'] = float(player_vals['yds']) / float(player_vals['att'])
+                            player_vals['yds'] = val
                         elif count == 15:
                             player_vals['td'] = val
                         elif count == 17:
-                            player_vals['rec'] = val
+                            player_vals['int'] = val
                         elif count == 19:
-                            player_vals['r_yds'] = val
+                            player_vals['rating'] = val
                         elif count == 21:
+                            player_vals['rush_yards'] = val
+                        elif count == 23:
                             player_vals['r_td'] = val
-                    elif position == 'QB':
-
                     else:
                         if val == '':
                             val = ' '
@@ -309,24 +355,20 @@ def read_file(file_name, sortBy, position):
                         elif count == 13:
                             player_vals['Touchdowns'] = val
                 count += 1
-                if ' ' in f and ')' not in f and '(' not in f and f != 'All Pro' and f != 'Below Average Starter':
+                if ' ' in f and ')' not in f and '(' not in f and f != 'All Pro' and f != 'Below Average Starter' and f != ' RB' and f != ' QB':
+                    print(f, ' : f, entering the final frontier', count)
                     player_vals['name'] = f.title()
+                    print(player_vals, ' player vals before classification')
                     player_vals['classification'] = random_prediction(player_vals, position)[0]
                     if position == 'RB':
-                        if 'att' in player_vals:
-                            del player_vals['att']
-                        if 'yds' in player_vals:
-                            del player_vals['yds']
+                        if 'Rec' in player_vals:
+                            del player_vals['Rec']
+                        if 'Yards' in player_vals:
+                            del player_vals['Yards']
                         if 'avg' in player_vals:
                             del player_vals['avg']
-                        if 'td' in player_vals:
-                            del player_vals['td']
-                        if 'rec' in player_vals:
-                            del player_vals['rec']
-                        if 'r_yds' in player_vals:
-                            del player_vals['r_yds']
-                        if 'r_td' in player_vals:
-                            del player_vals['r_td']
+                        if 'Touchdowns' in player_vals:
+                            del player_vals['Touchdowns']
                     elif position == 'QB':
                         if 'att' in player_vals:
                             del player_vals['att']
@@ -378,6 +420,9 @@ def player(request):
     position = request.GET.get('position', 'WR')
     sortBy = request.GET.get('sort', 'name')
     test = 'csv_files/' + str(position) + str(year) + '.csv'
+
+    print(position, year, sortBy, ' position, year, sort By')
+
     # file_name = f'csv_files/' + str(position) + str(year) + '.csv'
     total_stats = read_file(test, sortBy, position)
     # print(total_stats, ' RESPONSE BEING RETURNED IN API')

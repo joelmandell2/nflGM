@@ -9,7 +9,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
 
     const [page, setPage] = useState(1); // 1 indexed
     const [pageSize, setPageSize] = useState(defaultPageSize ?? 10);
-    const [draftYear, setDraftYear] = useState(2024);
+    const [draftYear, setDraftYear] = useState(2025);
     const [position, setPosition] = useState('WR');
     const [attribute, setAttrib] = useState('classification');
 
@@ -82,7 +82,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
     }
 
     function getRandomColor(classification) {
-      if(classification == 'All Pro'){
+      if(classification == 'All Pro' || classification == 'MVP'){
         return '#308942';
       }else if(classification == 'Starter'){
         return '#1349cc';

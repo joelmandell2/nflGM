@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Divider, Link } from '@mui/material';
+import PlayerCard from '../components/PlayerCard'
 
 
 import LazyTable from '../components/lazytable';
@@ -15,7 +16,7 @@ export default function HomePage () {
     // position
     
     // use state returns both the variable value a function to set it in the future
-    const [draftYear, setDraftYear] = useState(2024);
+    const [draftYear, setDraftYear] = useState(2025);
     const [position, setPosition] = useState('WR');
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [selectedAttrib, setSelectedAttrib] = useState('classification');
@@ -139,7 +140,7 @@ export default function HomePage () {
 
     return(
         <Container>
-            {selectedPlayer && <PlayerCard playerName={selectedPlayer} year={draftYear} pos={position}/>}
+            {/* {selectedPlayer && <PlayerCard playerName={selectedPlayer} year={draftYear} pos={position}/>} */}
             <Divider />
             <LazyTable route={`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`} columns={playerColumns} onYearChange={setDraftYear} onPositionChange={setPosition} onSelectedChange={setSelectedAttrib}/>
             <Divider />
