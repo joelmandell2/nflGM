@@ -564,6 +564,8 @@ def clamp(val, min, max):
     return max
 
 def get_prediction(request):
+    print('getting prediction from right endpoint')
+    print(request, ' request being sent in ')
     # make sure to clamp input values
     # normalize values 
     # fix url being passed into fetch
@@ -788,18 +790,27 @@ def get_prediction(request):
 
 
     if position == 'QB':
+        print('position = qb')
         pred = {'prediction' : qb_model.predict([norms])}
+        print(pred, ' prediciton')
         return JsonResponse(pred)
     elif position == 'RB':
+        print('position = rb')
         pred = {'prediction' : rb_model.predict([norms])}
+        print(' prediciton: ', pred)
         return JsonResponse(pred)
     elif position == 'TE':
+        print('position = te')
         pred = {'prediction' : te_model.predict([norms])}
+        print('prediction, ', pred)
         return JsonResponse(pred)
     else:
+        print('position = wr')
         forest_prediction = forest_wr_model.predict([norms])
         if forest_prediction != 'All Pro' or forest_prediction != 'Backup':
             pred = {'prediction' : logistic_wr_model.predict([norms])}
+            print('prediction', pred)
             return JsonResponse(pred)
         pred = {'prediction' : forest_prediction}
+        print('prediction', pred)
         return JsonResponse(pred)

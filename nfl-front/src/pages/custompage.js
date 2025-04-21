@@ -13,6 +13,7 @@ import {
   TextField,
   Slider
 } from '@mui/material';
+import { green } from '@mui/material/colors';
 
 const config = require('../config.json');
 
@@ -56,15 +57,33 @@ export default function CustomPage() {
     const [prediction, setPrediction] = useState(null);
 
     useEffect( () => {
+      if(cardState == 6){
       if(position == 'QB'){
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?p_name=${playerName}&draft_year=${year}&position=${pos}`)
+        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}
+        &height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&attempts=${passAttState}&percent=${pctState}
+        &pass_yards=${passYardsState}&pass_td=${passTouchdownsState}&interceptions=${intState}&qbr=${ratingState}&r_yds=${rushYardsState}&r_td=${rushTdState}`)
+        .then(res => res.json())
+        .then(resJson=> {
+          setPrediction(resJson.prediction);
+        })
       } else if(position == 'RB'){
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?p_name=${playerName}&draft_year=${year}&position=${pos}`)
-
+        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}
+        &height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&r_att=${rbAttState}&r_avg=${rbAvgState}
+        &r_yds=${rbYardsState}&r_td=${rbTdState}`)
+        .then(res => res.json())
+        .then(resJson=> {
+          setPrediction(resJson.prediction);
+        })
       } else {
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?p_name=${playerName}&draft_year=${year}&position=${pos}`)
+        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}
+        &height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}
+        &rec_yds=${recYardsState}&rec_td=${recTdState}`)     
+        .then(res => res.json())
+        .then(resJson=> {
+          setPrediction(resJson.prediction);
+        }) 
       }
-    }, [predictState]
+    }}, [cardState]
     );
 
 
@@ -393,39 +412,14 @@ export default function CustomPage() {
           display: 'flex',
           justifyContent: 'center', 
           mt: 10, 
-          gap: 2
+          gap: 2, 
       }}>
-      <Card sx={{ maxWidth: 1900 }}> 
+      <Card sx={{ maxWidth: 1900, bgcolor: 'green'}}> 
       <CardContent>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-
-        <TextField
-          label="Receptions"
-          id="receptions"
-          defaultValue={recState}
-          onChange={(val)=> {setRecState(val)}}
-          size="small"
-        />
-        <TextField
-          label="Receiving Yards"
-          id="rec"
-          defaultValue={recYardsState}
-          onChange={(val)=> {setrecYardsState(val)}}
-          size="small"
-        />
-      </Box>
-
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-        <TextField
-          label="Touchdowns"
-          id="weight"
-          defaultValue={recTdState}
-          onChange={(val)=> {setRecTdState(val)}}
-          size="small"
-        />
-      </Box>
-
-      <Box sx={{ justifyContent: 'center',  display: 'flex', gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2}}>
+        <Typography variant='h1' color='white'>
+            ${prediction}
+        </Typography>
       </Box>
       </CardContent>
       </Card>
