@@ -18,7 +18,7 @@ export default function HomePage () {
     // use state returns both the variable value a function to set it in the future
     const [draftYear, setDraftYear] = useState(2025);
     const [position, setPosition] = useState('WR');
-    const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [selectedPlayerName, setSelectedPlayerName] = useState(null);
     const [selectedAttrib, setSelectedAttrib] = useState('classification');
 
 
@@ -41,7 +41,6 @@ export default function HomePage () {
                 const playerData = dataArray.map((player) => {
                     return ({id: player.player_id || Math.random(), ...player});
                 });
-                setSelectedPlayer(playerData);
         })
         
 
@@ -54,10 +53,7 @@ export default function HomePage () {
         {
             field: 'name',
             headerName: 'Player',
-            // renderCell: (row) => <div onClick={ () => setSelectedPlayer('name')}
-            // style={{ cursor: "pointer", color: "white"}}>
-            //     {row.Weight}
-            // </div>
+           renderCell: (row) => <Link onClick={() => setSelectedPlayerName(row.name)} sx={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }}>{row.name} </Link>
         },
         {
             field: 'Height',
@@ -140,7 +136,7 @@ export default function HomePage () {
 
     return(
         <Container>
-            {/* {selectedPlayer && <PlayerCard playerName={selectedPlayer} year={draftYear} pos={position}/>} */}
+            {selectedPlayerName && <PlayerCard playerName={selectedPlayerName} year={draftYear} pos={position} handleClose={() => setSelectedPlayerName(null)}/>}
             <Divider />
             <LazyTable route={`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`} columns={playerColumns} onYearChange={setDraftYear} onPositionChange={setPosition} onSelectedChange={setSelectedAttrib}/>
             <Divider />

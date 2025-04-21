@@ -8,6 +8,7 @@ import { createTheme } from "@mui/material/styles";
 // don't have to import in curlys because it's the default function
 import HomePage from './pages/homepage';
 import NavBar from './components/NavBar';
+import CustomPage from './pages/custompage';
 
 
 import './App.css';
@@ -29,6 +30,7 @@ export default function App(){
         <NavBar />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/custom" element={<CustomPage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

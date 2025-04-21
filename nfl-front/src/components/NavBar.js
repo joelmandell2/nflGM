@@ -37,7 +37,7 @@ export default function NavBar() {
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
           <NavText href='/' text='NFL GM' isMain />
-          <NavText href='/albums' text='PLAYERS' />
+          <NavText href='/custom' text='CUSTOM' />
           <NavText href='/songs' text='ABOUT' />
         </Toolbar>
       </Container>
