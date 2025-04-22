@@ -59,25 +59,19 @@ export default function CustomPage() {
     useEffect( () => {
       if(cardState == 6){
       if(position == 'QB'){
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}
-        &height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&attempts=${passAttState}&percent=${pctState}
-        &pass_yards=${passYardsState}&pass_td=${passTouchdownsState}&interceptions=${intState}&qbr=${ratingState}&r_yds=${rushYardsState}&r_td=${rushTdState}`)
+        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&attempts=${passAttState}&percent=${pctState}&pass_yards=${passYardsState}&pass_td=${passTouchdownsState}&interceptions=${intState}&qbr=${ratingState}&r_yds=${rushYardsState}&r_td=${rushTdState}`)
         .then(res => res.json())
         .then(resJson=> {
           setPrediction(resJson.prediction);
         })
       } else if(position == 'RB'){
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}
-        &height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&r_att=${rbAttState}&r_avg=${rbAvgState}
-        &r_yds=${rbYardsState}&r_td=${rbTdState}`)
+        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&r_att=${rbAttState}&r_avg=${rbAvgState}&r_yds=${rbYardsState}&r_td=${rbTdState}`)
         .then(res => res.json())
         .then(resJson=> {
           setPrediction(resJson.prediction);
         })
       } else {
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}
-        &height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}
-        &rec_yds=${recYardsState}&rec_td=${recTdState}`)     
+        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}&rec_yds=${recYardsState}&rec_td=${recTdState}`)     
         .then(res => res.json())
         .then(resJson=> {
           setPrediction(resJson.prediction);
@@ -145,14 +139,14 @@ export default function CustomPage() {
             label="40 Yard Dash"
             id="dash-1"
             defaultValue={fortyState}
-            onChange={(val)=> {setFortyState(val)}}
+            onChange={(val)=> {setFortyState(val.target.value)}}
             size="small"
           />
           <TextField
             label="Height"
             id="height-1"
             defaultValue={heightState}
-            onChange={(val)=> {setHeightState(val)}}
+            onChange={(val)=> {setHeightState(val.target.value)}}
 
             size="small"
           />
@@ -163,14 +157,14 @@ export default function CustomPage() {
             label="Weight"
             id="weight"
             defaultValue={weightState}
-            onChange={(val)=> {setWeightState(val)}}
+            onChange={(val)=> {setWeightState(val.target.value)}}
             size="small"
           />
           <TextField
             label="Shuttle"
             id="Shuttle"
             defaultValue={shuttleState}
-            onChange={(val)=> {setShuttleState(val)}}
+            onChange={(val)=> {setShuttleState(val.target.value)}}
             size="small"
           />
         </Box>
@@ -180,14 +174,14 @@ export default function CustomPage() {
             label="Cone"
             id="Cone"
             defaultValue={coneState}
-            onChange={(val)=> {setConeState(val)}}
+            onChange={(val)=> {setConeState(val.target.value)}}
             size="small"
           />
           <TextField
             label="Broad Jump"
             id="Broad"
             defaultValue={broadState}
-            onChange={(val)=> {setBroadState(val)}}
+            onChange={(val)=> {setBroadState(val.target.value)}}
             size="small"
           />
         </Box>
@@ -197,14 +191,14 @@ export default function CustomPage() {
             label="Bench"
             id="Bench"
             defaultValue={benchState}
-            onChange={(val)=> {setBenchState(val)}}
+            onChange={(val)=> {setBenchState(val.target.value)}}
             size="small"
           />
           <TextField
             label="Vertical"
             id="Vertical"
             defaultValue={verticalState}
-            onChange={(val)=> {setVerticalState(val)}}
+            onChange={(val)=> {setVerticalState(val.target.value)}}
             size="small"
           />
         </Box>
@@ -233,14 +227,14 @@ export default function CustomPage() {
           label="Pass Attempts"
           id="dash-1"
           defaultValue={passAttState}
-          onChange={(val)=> {setPassAttState(val)}}
+          onChange={(val)=> {setPassAttState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Completion Pct"
           id="height-1"
           defaultValue={pctState}
-          onChange={(val)=> {setPctState(val)}}
+          onChange={(val)=> {setPctState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -250,14 +244,14 @@ export default function CustomPage() {
           label="Passing Yards"
           id="weight"
           defaultValue={passYardsState}
-          onChange={(val)=> {setPassYardsState(val)}}
+          onChange={(val)=> {setPassYardsState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Touchdowns"
           id="Shuttle"
           defaultValue={passTouchdownsState}
-          onChange={(val)=> {setPassTouchdownsState(val)}}
+          onChange={(val)=> {setPassTouchdownsState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -267,14 +261,14 @@ export default function CustomPage() {
           label="Interceptions"
           id="Cone"
           defaultValue={intState}
-          onChange={(val)=> {setIntState(val)}}
+          onChange={(val)=> {setIntState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Passer Rating"
           id="Broad"
           defaultValue={ratingState}
-          onChange={(val)=> {setRatingState(val)}}
+          onChange={(val)=> {setRatingState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -284,14 +278,14 @@ export default function CustomPage() {
           label="Rushing Yards"
           id="Bench"
           defaultValue={rushYardsState}
-          onChange={(val)=> {setRushYardsState(val)}}
+          onChange={(val)=> {setRushYardsState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Rushing Touchdowns"
           id="Vertical"
           defaultValue={rushTdState}
-          onChange={(val)=> {setRushTdState(val)}}
+          onChange={(val)=> {setRushTdState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -322,14 +316,14 @@ export default function CustomPage() {
           label="Rushing Attempts"
           id="dash-1"
           defaultValue={rbAttState}
-          onChange={(val)=> {setRbAttState(val)}}
+          onChange={(val)=> {setRbAttState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Rushing Yards"
           id="height-1"
           defaultValue={rbYardsState}
-          onChange={(val)=> {setRbYardsState(val)}}
+          onChange={(val)=> {setRbYardsState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -339,14 +333,14 @@ export default function CustomPage() {
           label="Average"
           id="height-1"
           defaultValue={rbAvgState}
-          onChange={(val)=> {setRbAvgState(val)}}
+          onChange={(val)=> {setRbAvgState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Touchdowns"
           id="weight"
           defaultValue={rbTdState}
-          onChange={(val)=> {setRbTdState(val)}}
+          onChange={(val)=> {setRbTdState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -376,14 +370,14 @@ export default function CustomPage() {
           label="Receptions"
           id="receptions"
           defaultValue={recState}
-          onChange={(val)=> {setRecState(val)}}
+          onChange={(val)=> {setRecState(val.target.value)}}
           size="small"
         />
         <TextField
           label="Receiving Yards"
           id="rec"
           defaultValue={recYardsState}
-          onChange={(val)=> {setrecYardsState(val)}}
+          onChange={(val)=> {setrecYardsState(val.target.value)}}
           size="small"
         />
       </Box>
@@ -393,7 +387,7 @@ export default function CustomPage() {
           label="Touchdowns"
           id="weight"
           defaultValue={recTdState}
-          onChange={(val)=> {setRecTdState(val)}}
+          onChange={(val)=> {setRecTdState(val.target.value)}}
           size="small"
         />
       </Box>

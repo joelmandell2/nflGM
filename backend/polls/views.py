@@ -6,18 +6,13 @@ import random
 import joblib
 import os
 import re
+import json
 
 
-#todo: custom player creator
-#   - allow input that switches with next button (accumulates in state)
-#   - fetch prediction based on that data (normalize each)
-#   - output prediction
+#todo: style custom player creator output
 #todo: create about me
 #todo: make sure security is solid (protects from xcision attacks)
 #todo: host on a server 
-
-#todo: create a three.js model that takes in time 
-# to output a color and based on that color, maps helmet 
 
 
 #comparators used to sort based on attribute
@@ -194,19 +189,47 @@ def normalize(key, val, position):
         return .5
     # need to read in these values
     minmax = load_minmax(position)
-    if key == 'Receptions':
+    if key == 'Attempts':
+        key = 'att'
+    elif key == 'r_att':
         key = 'Rec'
+    elif key == 'r_yds' and position == 'RB':
+        key = 'Yards'
+    elif key == 'r_td' and position == 'RB':
+        key = 'Touchdowns'
+    elif key == 'Percent':
+        key = 'pct'
+    elif key == 'rush_yards' and position != 'QB':
+        key = 'Yards'
+    elif key == 'p_yards':
+        key = 'yds'
+    elif key == 'p_td':
+        key = 'td'
+    elif key == 'interceptions':
+        key = 'int'
+    elif key == 'qbr':
+        key = 'rating'
+    elif key == 'r_yds' and position != 'RB':
+        key = 'rush_yards'
+    if key == 'Receptions' or key == 'rec':
+        key = 'Rec'
+    if key == 'rec_yds':
+        key = 'Yards'
+    if key == 'rec_td':
+        key = 'Touchdowns'
     if key == 'Height':
         if val == '5-11' or val == '5-10':
             val = 5.99
         else:
             val = str(val).replace('-', '.')
-    min = float(minmax[key][0])
-    max = float(minmax[key][1])
-    if max == min:
-        min = max - 1
-    output = (float(val) - float(min)) / (float(max) - float(min))
-    return output
+    mini = float(minmax[key][0])
+    maxi = float(minmax[key][1])
+    if maxi == mini:
+        mini = maxi - 1
+    output = float((float(val) - float(mini)) / (float(maxi) - float(mini)))
+    min_output = min(1.0, output)
+    max_output = max(0.0, min_output)
+    return max_output
 
 
 
@@ -342,19 +365,14 @@ def classify(count, word, position):
         
 
 def search_file(file_name, name, position):
-    print(file_name, ' fn ', name, ' name ', position, ' position')
     try:
         with open(file_name, 'r') as file:
-            print('file opened')
             data = file.read()
             cache = {}
             count = 0
             for row in data.split(','):
-                print(row, ' row')
                 if isName(row):
-                    print(row, ' name found, name desired : ', name)
                     if row.title() == name:
-                        print('is name ', row.title())
                         cache['name'] = row.title()
                         if position == 'QB':
                             if 'PCT' not in cache:
@@ -379,7 +397,6 @@ def search_file(file_name, name, position):
                                 cache['Yards'] = 0
                         if None in cache:
                             cache.pop(None, None)
-                        print('cache being returned: ', cache)
                         return cache
                     else:
                         cache = {}
@@ -397,13 +414,25 @@ def search_file(file_name, name, position):
     return 1
 
 
+def write_to_file(names, position, year):
+    file_n = str(position) + str(year) + 'pred.json'
+    with open(file_n, 'w') as file:
+        json.dump(names, file, indent=4)
+
+
+def read_from_file(file_n):
+    with open(file_n, 'r') as file:
+        data = json.load(file)
+        print(data)
+        return data
 
 #reads in file
-def read_file(file_name, sortBy, position):
+def read_file(file_name, sortBy, position, year):
     json_vals = []
     
     categories = ['Forty', 'Height', 'Weight', 'Shuttle', 'Cone', 'Broad', 'Bench', 'Vertical']
-
+    file_n = str(position) + str(year) + 'pred.json'
+    name_class = read_from_file(file_n)    
     try:
         with open(file_name, 'r') as file:
             data = file.read()
@@ -458,7 +487,9 @@ def read_file(file_name, sortBy, position):
                 count += 1
                 if ' ' in f and ')' not in f and '(' not in f and f != 'All Pro' and f != 'Below Average Starter' and f != ' RB' and f != ' QB':
                     player_vals['name'] = f.title()
-                    player_vals['classification'] = random_prediction(player_vals, position)[0]
+                    # player_vals['classification'] = random_prediction(player_vals, position)[0]
+                    player_vals['classification'] = name_class[f.title()]
+                    # name_class[f.title()] = player_vals['classification']
                     if position == 'RB':
                         if 'Rec' in player_vals:
                             del player_vals['Rec']
@@ -498,6 +529,7 @@ def read_file(file_name, sortBy, position):
     except FileNotFoundError:
         print('file not found error')
     sorted_json = sort(json_vals, sortBy)
+    # write_to_file(name_class, position, year)
     return sorted_json
 
 
@@ -522,7 +554,7 @@ def player(request):
 
 
     # file_name = f'csv_files/' + str(position) + str(year) + '.csv'
-    total_stats = read_file(test, sortBy, position)
+    total_stats = read_file(test, sortBy, position, year)
     # print(total_stats, ' RESPONSE BEING RETURNED IN API')
     return JsonResponse(total_stats, safe=False)
 
@@ -530,7 +562,6 @@ def player(request):
 
 def player_page(request):
     #todo: cache results and test name
-    print('player page request actually made...shocking')
     name = request.GET.get('p_name', '')
     # name = 'gunnar helm'
     year = request.GET.get('draft_year', 2025)
@@ -538,15 +569,12 @@ def player_page(request):
 
     file_name = 'csv_files/' + str(pos) + str(year) + '.csv'
 
-    print(name, ' name ' ,year, ' year ', pos, ' position ', file_name, ' file name')
     player_stats = search_file(file_name, name, pos)
-    print(player_stats, ' what is actually being returned')
     return JsonResponse(player_stats, safe=False)
 
   
 
 def draft_year(request):
-    print('draft year request made')
     year = request.GET.get('year', 2025)
     json = {
         'players': [{  # Wrap list inside a dictionary
@@ -564,8 +592,6 @@ def clamp(val, min, max):
     return max
 
 def get_prediction(request):
-    print('getting prediction from right endpoint')
-    print(request, ' request being sent in ')
     # make sure to clamp input values
     # normalize values 
     # fix url being passed into fetch
@@ -583,6 +609,7 @@ def get_prediction(request):
     shuttle = request.GET.get('shuttle', 6.9)
     bench = request.GET.get('bench', 20)
 
+
     attempts = request.GET.get('attempts', 100)
     pct = request.GET.get('percent', 50)
     pass_yards = request.GET.get('pass_yards', 1500)
@@ -591,12 +618,14 @@ def get_prediction(request):
     qbr = request.GET.get('qbr', 50)
     r_yds = request.GET.get('r_yds', 10)
     r_td = request.GET.get('r_td', 1)
-    r_avg = request.GET.get('r_avg', 1)
     r_att = request.GET.get('r_att', 1)
     rec = request.GET.get('rec', 1)
+
     rec_yds = request.GET.get('rec_yds', 1)
-    rec_avg = request.GET.get('rec_avg', 1)
+
     rec_td = request.GET.get('rec_td', 1)
+
+    rec_avg = float(rec_yds) / float(rec)
 
     # categories = ['Forty', 'Height', 'Weight', 'Shuttle', 'Cone', 'Broad', 'Bench', 'Vertical']
 
@@ -607,14 +636,14 @@ def get_prediction(request):
         forty = float(clean(forty))
     except ValueError:
         forty = 4.7 
-    forty = normalize('Forty', clean(clamp(forty, 4.1, 6.0)), position)
-    norms.append(forty)
+    forty = normalize('Forty', clamp(forty, 4.1, 6.0), position)
 
+    norms.append(forty)
     try:
         height = float(clean(height))
     except ValueError:
         height = 6.0 
-    height = normalize('Height', clean(clamp(height, 5.5, 6.9)), position)
+    height = normalize('Height', clamp(height, 5.5, 6.9), position)
     norms.append(height)
 
 
@@ -622,42 +651,42 @@ def get_prediction(request):
         weight = float(clean(weight))
     except ValueError:
         weight = 200 
-    weight = normalize('Weight', clean(clamp(weight, 130, 350)), position)
+    weight = normalize('Weight', clamp(weight, 130, 350), position)
     norms.append(weight)
 
     try:
         shuttle = float(clean(shuttle))
     except ValueError:
         shuttle = 6.9 
-    shuttle = normalize('Shuttle', clean(clamp(shuttle, 5.0, 9.9)), position)
+    shuttle = normalize('Shuttle', clamp(shuttle, 5.0, 9.9), position)
     norms.append(shuttle)
 
     try:
         broad = float(clean(broad))
     except ValueError:
         broad = 100
-    broad = normalize('Broad', clean(clamp(broad, 50, 200)), position)
+    broad = normalize('Broad', clamp(broad, 50, 200), position)
     norms.append(broad)
     
     try:
         cone = float(clean(cone))
     except ValueError:
         cone = 100
-    cone = normalize('Cone', clean(clamp(broad, 3.0, 10.0)), position)
+    cone = normalize('Cone', clamp(broad, 3.0, 10.0), position)
     norms.append(cone)
 
     try:
         vertical = float(clean(vertical))
     except ValueError:
         vertical = 100
-    vertical = normalize('Vertical', clean(clamp(broad, 0, 80)), position)
+    vertical = normalize('Vertical', clamp(broad, 0, 80), position)
     norms.append(vertical)
 
     try:
         bench = float(clean(bench))
     except ValueError:
         bench = 100
-    bench = normalize('Cone', clean(clamp(bench, 0, 80)), position)
+    bench = normalize('Cone', clamp(bench, 0, 80), position)
     norms.append(bench)
 
     if position == 'QB':
@@ -666,65 +695,71 @@ def get_prediction(request):
             att = float(clean(attempts))
         except ValueError:
             att = 100
-        att = normalize('Attempts', clean(clamp(att, 0, 100000)), position)
+        att = normalize('Attempts', clamp(att, 0, 100000), position)
         norms.append(att)
 
         try:
             pct = float(clean(pct))
         except ValueError:
             pct = 50
-        pct = normalize('Percent', clean(clamp(pct, 0, 101)), position)
+        pct = normalize('Percent', clamp(pct, 0, 101), position)
         norms.append(pct)
     # starts here
         try:
             pass_yards = float(clean(pass_yards))
         except ValueError:
             pass_yards = 100
-        pass_yards = normalize('p_yards', clean(clamp(pass_yards, 0, 100000)), position)
+        pass_yards = normalize('p_yards', clamp(pass_yards, 0, 100000), position)
         norms.append(pass_yards)
 
         try:
             pass_td = float(clean(pass_td))
         except ValueError:
             pass_td = 20
-        pass_td = normalize('p_td', clean(clamp(pass_td, 0, 10000)), position)
+        pass_td = normalize('p_td', clamp(pass_td, 0, 10000), position)
         norms.append(pass_td)
 
         try:
             interceptions = float(clean(interceptions))
         except ValueError:
             interceptions = 10
-        interceptions = normalize('interceptions', clean(clamp(interceptions, 0, 200)), position)
+        interceptions = normalize('interceptions', clamp(interceptions, 0, 200), position)
         norms.append(interceptions)
 
         try:
             qbr = float(clean(qbr))
         except ValueError:
             qbr = 10
-        qbr = normalize('qbr', clean(clamp(qbr, 0, 300)), position)
+        qbr = normalize('qbr', clamp(qbr, 0, 300), position)
         norms.append(qbr)
 
         try:
             r_yds = float(clean(r_yds))
         except ValueError:
             r_yds = 10
-        r_yds = normalize('r_yds', clean(clamp(r_yds, 0, 10000)), position)
+        r_yds = normalize('r_yds', clamp(r_yds, 0, 10000), position)
         norms.append(r_yds)
 
         try:
             r_td = float(clean(r_td))
         except ValueError:
             r_td = 10
-        r_td = normalize('r_td', clean(clamp(r_td, 0, 800)), position)
+        r_td = normalize('r_td', clamp(r_td, 0, 800), position)
         norms.append(r_td)
 
     elif position == 'RB':
+        try:
+            r_att = float(clean(r_att))
+        except ValueError:
+            r_att = 10
+        r_att = normalize('r_att', clamp(r_att, 0, 10000), position)
+        norms.append(r_att)
         # rb attributes
         try:
             r_yds = float(clean(r_yds))
         except ValueError:
             r_yds = 10
-        r_yds = normalize('r_yds', clean(clamp(r_yds, 0, 10000)), position)
+        r_yds = normalize('r_yds', clamp(r_yds, 0, 10000), position)
         norms.append(r_yds)
 
 
@@ -732,23 +767,14 @@ def get_prediction(request):
             r_td = float(clean(r_td))
         except ValueError:
             r_td = 10
-        r_td = normalize('r_td', clean(clamp(r_td, 0, 10000)), position)
+        r_td = normalize('r_td', clamp(r_td, 0, 10000), position)
         norms.append(r_td)
+    
 
+        avg = r_yds / r_att
+        averag = normalize('avg', clamp(avg, 0, 10000), position)
+        norms.append(averag)
 
-        try:
-            r_att = float(clean(r_att))
-        except ValueError:
-            r_att = 10
-        r_att = normalize('r_att', clean(clamp(r_att, 0, 10000)), position)
-        norms.append(r_att)
-
-        try:
-            r_avg = float(clean(r_avg))
-        except ValueError:
-            r_avg = 10
-        r_avg = normalize('r_avg', clean(clamp(r_avg, 0, 100)), position)
-        norms.append(r_avg)
 
     else:
         # wr attributes
@@ -757,31 +783,24 @@ def get_prediction(request):
             rec = float(clean(rec))
         except ValueError:
             rec = 10
-        rec = normalize('rec', clean(clamp(rec, 0, 10000)), position)
+        rec = normalize('rec', clamp(rec, 0, 10000), position)
         norms.append(rec)
 
         try:
             rec_yds = float(clean(rec_yds))
         except ValueError:
             rec_yds = 10
-        rec_yds = normalize('rec_yds', clean(clamp(rec_yds, 0, 10000)), position)
+        rec_yds = normalize('rec_yds', clamp(rec_yds, 0, 10000), position)
         norms.append(rec_yds)
-
-        try:
-            rec_avg = float(clean(rec_avg))
-        except ValueError:
-            rec_avg = 10
-        rec_avg = normalize('rec_avg', clean(clamp(rec_avg, 0, 100)), position)
-        norms.append(rec_avg)
-
 
         try:
             rec_td = float(clean(rec_td))
         except ValueError:
             rec_td = 10
-        rec_td = normalize('rec_td', clean(clamp(rec_td, 0, 300)), position)
+        rec_td = normalize('rec_td', clamp(rec_td, 0, 300), position)
         norms.append(rec_td)
     
+
     forest_wr_model = joblib.load('random_forest_model_wr.pkl')
     logistic_wr_model = joblib.load('logistic_model_wr.pkl')
     qb_model = joblib.load('logistic_model_qb.pkl')
@@ -790,27 +809,18 @@ def get_prediction(request):
 
 
     if position == 'QB':
-        print('position = qb')
-        pred = {'prediction' : qb_model.predict([norms])}
-        print(pred, ' prediciton')
+        pred = {'prediction' : qb_model.predict([norms])[0]}
         return JsonResponse(pred)
     elif position == 'RB':
-        print('position = rb')
-        pred = {'prediction' : rb_model.predict([norms])}
-        print(' prediciton: ', pred)
+        pred = {'prediction' : rb_model.predict([norms])[0]}
         return JsonResponse(pred)
     elif position == 'TE':
-        print('position = te')
-        pred = {'prediction' : te_model.predict([norms])}
-        print('prediction, ', pred)
+        pred = {'prediction' : te_model.predict([norms])[0]}
         return JsonResponse(pred)
     else:
-        print('position = wr')
-        forest_prediction = forest_wr_model.predict([norms])
+        forest_prediction = forest_wr_model.predict([norms])[0]
         if forest_prediction != 'All Pro' or forest_prediction != 'Backup':
-            pred = {'prediction' : logistic_wr_model.predict([norms])}
-            print('prediction', pred)
+            pred = {'prediction' : logistic_wr_model.predict([norms])[0]}
             return JsonResponse(pred)
         pred = {'prediction' : forest_prediction}
-        print('prediction', pred)
         return JsonResponse(pred)
