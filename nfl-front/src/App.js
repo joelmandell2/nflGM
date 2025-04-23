@@ -9,6 +9,7 @@ import { createTheme } from "@mui/material/styles";
 import HomePage from './pages/homepage';
 import NavBar from './components/NavBar';
 import CustomPage from './pages/custompage';
+import AboutMe from './pages/aboutme';
 
 
 import './App.css';
@@ -31,6 +32,7 @@ export default function App(){
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/custom" element={<CustomPage />} />
+          <Route path="/about" element={<AboutMe/>}/>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

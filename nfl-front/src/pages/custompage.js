@@ -412,7 +412,7 @@ export default function CustomPage() {
       <CardContent>
       <Box sx={{ display: 'flex', gap: 2, mb: 2}}>
         <Typography variant='h1' color='white'>
-            ${prediction}
+            {prediction}
         </Typography>
       </Box>
       </CardContent>

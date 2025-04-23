@@ -927,46 +927,46 @@ def readCSVNew(fns, pos):
     min_max = norms
     means = norms[1]
 
-    with open('normsQB.csv', 'w') as file:
-        for count in range(16):
-            if count == 0:
-                file.write('Forty')
-            elif count == 1:
-                file.write('Height')
-            elif count == 2:
-                file.write('Weight')
-            elif count == 3:
-                file.write('Shuttle')
-            elif count == 4:
-                file.write('Cone')
-            elif count == 5:
-                file.write('Broad')
-            elif count == 6:
-                file.write('Bench')
-            elif count == 7:
-                file.write('Vertical')
-            elif count == 8:
-                file.write('att')
-            elif count == 9:
-                file.write('pct')
-            elif count == 10:
-                file.write('yds')
-            elif count == 11:
-                file.write('td')
-            elif count == 12:
-                file.write('int')
-            elif count == 13:
-                file.write('rating')
-            elif count == 14:
-                file.write('rush_yards')
-            elif count == 15:
-                file.write('r_td')
-            file.write(',')
-            file.write(str(min_max[count][0]))
-            file.write(',')
-            file.write(str(min_max[count][1]))
-            file.write(',')
-            count += 1
+    # with open('normsQB.csv', 'w') as file:
+    #     for count in range(16):
+    #         if count == 0:
+    #             file.write('Forty')
+    #         elif count == 1:
+    #             file.write('Height')
+    #         elif count == 2:
+    #             file.write('Weight')
+    #         elif count == 3:
+    #             file.write('Shuttle')
+    #         elif count == 4:
+    #             file.write('Cone')
+    #         elif count == 5:
+    #             file.write('Broad')
+    #         elif count == 6:
+    #             file.write('Bench')
+    #         elif count == 7:
+    #             file.write('Vertical')
+    #         elif count == 8:
+    #             file.write('att')
+    #         elif count == 9:
+    #             file.write('pct')
+    #         elif count == 10:
+    #             file.write('yds')
+    #         elif count == 11:
+    #             file.write('td')
+    #         elif count == 12:
+    #             file.write('int')
+    #         elif count == 13:
+    #             file.write('rating')
+    #         elif count == 14:
+    #             file.write('rush_yards')
+    #         elif count == 15:
+    #             file.write('r_td')
+    #         file.write(',')
+    #         file.write(str(min_max[count][0]))
+    #         file.write(',')
+    #         file.write(str(min_max[count][1]))
+    #         file.write(',')
+    #         count += 1
 
 
     isDone = False
@@ -1231,7 +1231,7 @@ class MulticlassPerceptron():
         return prediction
 
 
-complete_set = readCSVNew(getFileName('QB'), 'QB')
+complete_set = readCSVNew(getFileName('RB'), 'RB')
 # print(complete_set)
 
 perc = multiPerceptron(complete_set)
@@ -1247,15 +1247,16 @@ multiclass_predictions = perc.model.predict(perc.x_test)
 weights = {
     'Backup' : 1.0,
     # 'Below Average Starter' : 3.0,
-    'MVP' : 10,
-    'All Pro' : 2
+    # 'MVP' : 10,
+    'Starter': 10,
+    'All Pro' : 50
 }
 forest = randomForest(complete_set, weights)
 forest_predictions = forest.model.predict(forest.x_test)
 print(forest_predictions, ' forest prediction')
 print(forest.y_test, ' actual classifications')
 # joblib.dump(perc.model, 'perc_model_rb.pkl')
-joblib.dump(logistic.model, 'logistic_model_qb.pkl')  # Saves the model as a file
+# joblib.dump(logistic.model, 'logistic_model_qb.pkl')  # Saves the model as a file
 
 
 # Evaluate performance

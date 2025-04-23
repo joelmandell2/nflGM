@@ -38,7 +38,7 @@ export default function NavBar() {
         <Toolbar disableGutters>
           <NavText href='/' text='NFL GM' isMain />
           <NavText href='/custom' text='CUSTOM' />
-          <NavText href='/songs' text='ABOUT' />
+          <NavText href='/about' text='ABOUT' />
         </Toolbar>
       </Container>
     </AppBar>

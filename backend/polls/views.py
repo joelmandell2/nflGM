@@ -592,13 +592,7 @@ def clamp(val, min, max):
     return max
 
 def get_prediction(request):
-    # make sure to clamp input values
-    # normalize values 
-    # fix url being passed into fetch
-    # get the response prediction from the json
-    # transform the color of the card based on that prediction
-    # display the acutal prediction
-    # allow resetting of predictor
+
     position = request.GET.get('position', 'RB')
     forty = request.GET.get('forty', 4.5)
     height = request.GET.get('height', 6.2)
