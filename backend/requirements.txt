@@ -2,7 +2,6 @@ alabaster
 anyio 
 appdirs==1.4.4
 appnope
-appscript
 argon2-cffi
 argon2-cffi-bindings
 arrow
