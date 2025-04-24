@@ -45,7 +45,7 @@ cryptography
 cssselect==1.1.0
 cycler
 Cython
-cytoolz==0.11.0
+cytoolz --prefer-binary
 daal4py
 dask
 datashader
@@ -252,7 +252,7 @@ s3transfer
 scikit-image
 scikit-learn
 scikit-learn-intelex
-scipy==1.10.1
+scipy
 Scrapy
 seaborn
 selenium==4.28.1
