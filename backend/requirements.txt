@@ -41,7 +41,7 @@ cloudpickle
 clyent==1.2.1
 colorama
 colorcet
-conda==22.11.1
+conda
 conda-build==3.22.0
 conda-content-trust
 conda-pack
