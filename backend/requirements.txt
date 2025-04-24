@@ -283,7 +283,7 @@ statsmodels
 sympy
 tables
 tabulate
-TBB==0.2
+TBB
 tblib
 tenacity
 terminado
