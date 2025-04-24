@@ -1,7 +1,6 @@
 alabaster
 anyio 
 appdirs==1.4.4
-applaunchservices
 appnope
 appscript
 argon2-cffi
