@@ -248,7 +248,6 @@ requests-oauthlib==2.0.0
 rope
 rsa==4.9
 Rtree
-ruamel-yaml-conda
 ruamel.yaml
 ruamel.yaml.clib
 s3transfer
