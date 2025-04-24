@@ -133,7 +133,7 @@ keyring
 kiwisolver
 lazy-object-proxy
 libarchive-c 
-llvmlite==0.38.0
+llvmlite
 locket
 lxml
 lz4
