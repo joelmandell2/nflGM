@@ -146,7 +146,7 @@ mccabe
 mistune
 mkl-fft
 mkl-random
-mkl-service==2.4.0
+mkl-service
 mock
 mpmath==1.2.1
 msgpack
