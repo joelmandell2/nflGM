@@ -31,11 +31,11 @@ def num_convert(x):
 def random_pick():
     num = random(1, 4)
     if num == 1:
-        return 'All Pro'
+        return {'prediction' : 'All Pro'}
     elif num == 2:
-        return 'Starter'
+        return {'prediction' : 'Starter'}
     else:
-        return 'Backup'
+        return {'prediction' : 'Backup'}
 
 def prediction_comp(a, b):
     a_comp = a['classification']
