@@ -25,6 +25,7 @@ export default function LazyTable({route, columns, defaultPageSize, rowsPerPageO
       .then(res => res.json())
       .then(resJson => {
     // Check if resJson is an array, otherwise look for players property
+    console.log(resJson, " response");
         const dataArray = Array.isArray(resJson) ? resJson : resJson.players || [];
         setData(dataArray);
     });

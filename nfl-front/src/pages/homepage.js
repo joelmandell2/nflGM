@@ -29,7 +29,8 @@ export default function HomePage () {
         // returns a promise for an object (basically like saying that object will be there in the future)
         // then is called on that object once it is returned
         console.log('about to fetch from :', config.server_host, config.server_port);
-        fetch(`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`)
+        // fetch(`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`)
+        fetch(`https://${config.server_host}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`)
         .then(res => res.json())
         .then(resJson => {
                 // the map function applies whatever you tell it to do to each value element in array you're calling it on (resJson)
@@ -133,12 +134,13 @@ export default function HomePage () {
     // the html that the page actually returns
     // probably need to fix lazy table route
 
+    // <LazyTable route={`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`} columns={playerColumns} onYearChange={setDraftYear} onPositionChange={setPosition} onSelectedChange={setSelectedAttrib}/>
 
     return(
         <Container>
             {selectedPlayerName && <PlayerCard playerName={selectedPlayerName} year={draftYear} pos={position} handleClose={() => setSelectedPlayerName(null)}/>}
             <Divider />
-            <LazyTable route={`http://${config.server_host}:${config.server_port}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`} columns={playerColumns} onYearChange={setDraftYear} onPositionChange={setPosition} onSelectedChange={setSelectedAttrib}/>
+            <LazyTable route={`https://${config.server_host}/player?year=${draftYear}&position=${position}&sort=${selectedAttrib}`} columns={playerColumns} onYearChange={setDraftYear} onPositionChange={setPosition} onSelectedChange={setSelectedAttrib}/>
             <Divider />
         </Container>
     );

@@ -19,7 +19,9 @@ export default function PlayerCard({playerName, year, pos, handleClose}){
     
 
     useEffect( () => {
-        fetch(`http://${config.server_host}:${config.server_port}/player_page?p_name=${playerName}&draft_year=${year}&position=${pos}`)
+        // fetch(`http://${config.server_host}:${config.server_port}/player_page?p_name=${playerName}&draft_year=${year}&position=${pos}`)
+
+        fetch(`https://${config.server_host}/player_page?p_name=${playerName}&draft_year=${year}&position=${pos}`)
         .then(res => res.json())
         .then(resJson => {
             setPlayerData(resJson);

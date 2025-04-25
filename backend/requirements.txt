@@ -115,7 +115,7 @@ jellyfish
 Jinja2
 jinja2-time
 jmespath
-joblib
+joblib==1.2.0
 json5
 jsonschema
 jupyter
@@ -250,7 +250,7 @@ ruamel.yaml
 ruamel.yaml.clib
 s3transfer
 scikit-image
-scikit-learn
+scikit-learn==1.0.2
 scikit-learn-intelex
 scipy
 Scrapy

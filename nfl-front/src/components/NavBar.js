@@ -44,3 +44,9 @@ export default function NavBar() {
     </AppBar>
   );
 }
+
+
+// {
+//   "server_host": "localhost",
+//   "server_port": "8000"
+// }

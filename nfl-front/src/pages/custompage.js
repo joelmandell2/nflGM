@@ -59,21 +59,26 @@ export default function CustomPage() {
     useEffect( () => {
       if(cardState == 6){
       if(position == 'QB'){
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&attempts=${passAttState}&percent=${pctState}&pass_yards=${passYardsState}&pass_td=${passTouchdownsState}&interceptions=${intState}&qbr=${ratingState}&r_yds=${rushYardsState}&r_td=${rushTdState}`)
+        // fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&attempts=${passAttState}&percent=${pctState}&pass_yards=${passYardsState}&pass_td=${passTouchdownsState}&interceptions=${intState}&qbr=${ratingState}&r_yds=${rushYardsState}&r_td=${rushTdState}`)
+        fetch(`https://${config.server_host}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&attempts=${passAttState}&percent=${pctState}&pass_yards=${passYardsState}&pass_td=${passTouchdownsState}&interceptions=${intState}&qbr=${ratingState}&r_yds=${rushYardsState}&r_td=${rushTdState}`)
         .then(res => res.json())
         .then(resJson=> {
           setPrediction(resJson.prediction);
         })
       } else if(position == 'RB'){
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&r_att=${rbAttState}&r_avg=${rbAvgState}&r_yds=${rbYardsState}&r_td=${rbTdState}`)
+        // fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&r_att=${rbAttState}&r_avg=${rbAvgState}&r_yds=${rbYardsState}&r_td=${rbTdState}`)
+        fetch(`https://${config.server_host}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&r_att=${rbAttState}&r_avg=${rbAvgState}&r_yds=${rbYardsState}&r_td=${rbTdState}`)
         .then(res => res.json())
         .then(resJson=> {
           setPrediction(resJson.prediction);
         })
       } else {
-        fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}&rec_yds=${recYardsState}&rec_td=${recTdState}`)     
+        // fetch(`http://${config.server_host}:${config.server_port}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}&rec_yds=${recYardsState}&rec_td=${recTdState}`)     
+        const route = `https://${config.server_host}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}&rec_yds=${recYardsState}&rec_td=${recTdState}`;
+        fetch(`https://${config.server_host}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}&rec_yds=${recYardsState}&rec_td=${recTdState}`)     
         .then(res => res.json())
         .then(resJson=> {
+          console.log(resJson, " prediction returned");
           setPrediction(resJson.prediction);
         }) 
       }
