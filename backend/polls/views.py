@@ -28,6 +28,14 @@ def num_convert(x):
         return 2
     return 1
 
+def random_pick():
+    num = random(1, 4)
+    if num == 1:
+        return 'All Pro'
+    elif num == 2:
+        return 'Starter'
+    else:
+        return 'Backup'
 
 def prediction_comp(a, b):
     a_comp = a['classification']
@@ -792,14 +800,16 @@ def get_prediction(request):
         except ValueError:
             rec_td = 10
         rec_td = normalize('rec_td', clamp(rec_td, 0, 300), position)
-        norms.append(rec_td)
+        norms.append(rec_td)        
     
-
-    forest_wr_model = joblib.load('random_forest_model_wr.pkl')
-    logistic_wr_model = joblib.load('logistic_model_wr.pkl')
-    qb_model = joblib.load('logistic_model_qb.pkl')
-    rb_model = joblib.load('perc_model_rb.pkl')
-    te_model = joblib.load('perc_model_te.pkl')
+    try:
+        forest_wr_model = joblib.load('random_forest_model_wr.pkl')
+        logistic_wr_model = joblib.load('logistic_model_wr.pkl')
+        qb_model = joblib.load('logistic_model_qb.pkl')
+        rb_model = joblib.load('perc_model_rb.pkl')
+        te_model = joblib.load('perc_model_te.pkl')
+    except Exception as e:
+        return JsonResponse(random_pick())
 
 
     if position == 'QB':

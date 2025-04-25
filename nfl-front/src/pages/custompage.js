@@ -78,7 +78,6 @@ export default function CustomPage() {
         fetch(`https://${config.server_host}/prediction?position=${position}&forty=${fortyState}&height=${heightState}&weight=${weightState}&broad=${broadState}&cone=${coneState}&vertical=${verticalState}&shuttle=${shuttleState}&bench=${benchState}&rec=${recState}&rec_avg=${recTdState}&rec_yds=${recYardsState}&rec_td=${recTdState}`)     
         .then(res => res.json())
         .then(resJson=> {
-          console.log(resJson, " prediction returned");
           setPrediction(resJson.prediction);
         }) 
       }
