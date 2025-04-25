@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/nflGM/static/css/main.dc4d6ff2.css",
+    "main.js": "/nflGM/static/js/main.a96209d4.js",
+    "index.html": "/nflGM/index.html",
+    "main.dc4d6ff2.css.map": "/nflGM/static/css/main.dc4d6ff2.css.map",
+    "main.a96209d4.js.map": "/nflGM/static/js/main.a96209d4.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dc4d6ff2.css",
+    "static/js/main.a96209d4.js"
+  ]
+}
